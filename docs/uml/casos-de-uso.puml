@@ -1,0 +1,61 @@
+@startuml Casos de Uso — Sistema de Aluguel de Carros
+
+skinparam actorStyle awesome
+skinparam backgroundColor #0A0A0A
+skinparam ArrowColor #F59E0B
+skinparam ActorBorderColor #F59E0B
+skinparam ActorFontColor #F5F5F5
+skinparam UseCaseBorderColor #F59E0B
+skinparam UseCaseFontColor #F5F5F5
+skinparam UseCaseBackgroundColor #1C1C1C
+skinparam packageBorderColor #444
+skinparam defaultFontColor #F5F5F5
+
+left to right direction
+
+actor "Cliente"       as C
+actor "Empresa"       as E
+actor "Banco"         as B
+
+rectangle "Sistema de Aluguel de Carros" {
+
+  usecase "Cadastrar-se"            as UC1
+  usecase "Fazer login"             as UC2
+  usecase "Visualizar catálogo"     as UC3
+  usecase "Solicitar aluguel"       as UC4
+  usecase "Consultar pedidos"       as UC5
+  usecase "Modificar pedido"        as UC6
+  usecase "Cancelar pedido"         as UC7
+  usecase "Visualizar perfil"       as UC8
+  usecase "Gerenciar rendimentos"   as UC9
+
+  usecase "Listar todos os pedidos" as UC10
+  usecase "Avaliar pedido"          as UC11
+  usecase "Modificar pedido"        as UC12
+
+  usecase "Criar contrato de crédito" as UC13
+
+}
+
+C --> UC1
+C --> UC2
+C --> UC3
+C --> UC4
+C --> UC5
+C --> UC6
+C --> UC7
+C --> UC8
+C --> UC9
+
+E --> UC2
+E --> UC10
+E --> UC11
+E --> UC12
+
+B --> UC2
+B --> UC10
+B --> UC11
+B --> UC12
+B --> UC13
+
+@enduml

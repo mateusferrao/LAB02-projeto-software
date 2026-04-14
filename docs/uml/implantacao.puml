@@ -1,0 +1,59 @@
+@startuml Diagrama de Implantação — Sistema de Aluguel de Carros
+
+skinparam backgroundColor #0A0A0A
+skinparam nodeBackgroundColor #1C1C1C
+skinparam nodeBorderColor #F59E0B
+skinparam ArrowColor #F59E0B
+skinparam defaultFontColor #F5F5F5
+skinparam artifactBackgroundColor #222
+skinparam artifactBorderColor #555
+
+node "Máquina do Desenvolvedor / Servidor" as Host {
+
+  node "Docker Engine" as Docker {
+
+    node "Container: frontend\nImagem: nginx:alpine\nPorta: 5173 → 80" as FE {
+      artifact "dist/ (React Build)" as ReactBuild
+      artifact "nginx.conf" as NginxConf
+    }
+
+    node "Container: backend\nImagem: node:20-alpine\nPorta: 3001" as BE {
+      artifact "dist/server.js" as Server
+      artifact "Prisma Client" as PC
+      artifact "prisma/migrations/" as Migrations
+    }
+
+    node "Container: db\nImagem: postgres:16-alpine\nPorta: 5432" as DB {
+      database "PostgreSQL\n(Volume: pgdata)" as PG
+    }
+  }
+}
+
+node "Navegador do Usuário" as Browser {
+  artifact "React SPA (JS/CSS)" as SPA
+}
+
+Browser --> FE   : HTTP :5173
+FE       --> BE  : HTTP :3001 (REST API)
+BE       --> DB  : TCP :5432
+BE       ..> BE  : prisma migrate deploy\n(startup)
+
+note right of FE
+  Serve os arquivos estáticos
+  do build React via Nginx.
+  SPA fallback habilitado.
+end note
+
+note right of BE
+  Node.js + Express + Prisma.
+  Roda migrate automaticamente
+  ao iniciar o container.
+end note
+
+note right of DB
+  Dados persistidos em
+  Docker Volume (pgdata).
+  HealthCheck: pg_isready.
+end note
+
+@enduml

@@ -1,0 +1,86 @@
+@startuml Diagrama de Pacotes — Visão Lógica
+
+skinparam backgroundColor #0A0A0A
+skinparam packageBackgroundColor #1C1C1C
+skinparam packageBorderColor #F59E0B
+skinparam ArrowColor #F59E0B
+skinparam defaultFontColor #F5F5F5
+
+package "Frontend (React + TypeScript)" {
+  package "pages" {
+    [Home]
+    [Login / Register]
+    [Catalogo / DetalheCarro]
+    [MeusPedidos]
+    [PainelAgente]
+  }
+  package "components" {
+    [Navbar]
+    [CarCard]
+    [StatusBadge]
+    [ProtectedRoute]
+  }
+  package "contexts" {
+    [AuthContext]
+  }
+  package "services" {
+    [api (Axios)]
+  }
+}
+
+package "Backend (Node.js + Express)" {
+  package "routes" {
+    [auth.routes]
+    [cliente.routes]
+    [automovel.routes]
+    [pedido.routes]
+  }
+  package "controllers" {
+    [AuthController]
+    [ClienteController]
+    [AutomovelController]
+    [PedidoController]
+  }
+  package "services" {
+    [AuthService]
+    [ClienteService]
+    [AutomovelService]
+    [PedidoService]
+  }
+  package "middlewares" {
+    [authenticate]
+    [requireRole]
+    [errorHandler]
+  }
+  package "config" {
+    [PrismaClient]
+  }
+}
+
+package "Banco de Dados (PostgreSQL)" {
+  [Tabelas: Usuario, Cliente, Rendimento,\nEmpresa, Banco, Automovel,\nPedidoAluguel, ContratoCredito]
+}
+
+[api (Axios)] --> [auth.routes]
+[api (Axios)] --> [cliente.routes]
+[api (Axios)] --> [automovel.routes]
+[api (Axios)] --> [pedido.routes]
+
+[auth.routes] --> [AuthController]
+[cliente.routes] --> [ClienteController]
+[automovel.routes] --> [AutomovelController]
+[pedido.routes] --> [PedidoController]
+
+[AuthController] --> [AuthService]
+[ClienteController] --> [ClienteService]
+[AutomovelController] --> [AutomovelService]
+[PedidoController] --> [PedidoService]
+
+[AuthService] --> [PrismaClient]
+[ClienteService] --> [PrismaClient]
+[AutomovelService] --> [PrismaClient]
+[PedidoService] --> [PrismaClient]
+
+[PrismaClient] --> [Tabelas: Usuario, Cliente, Rendimento,\nEmpresa, Banco, Automovel,\nPedidoAluguel, ContratoCredito]
+
+@enduml

@@ -1,0 +1,115 @@
+@startuml Diagrama de Classes — Sistema de Aluguel de Carros
+
+skinparam backgroundColor #0A0A0A
+skinparam ClassBackgroundColor #1C1C1C
+skinparam ClassBorderColor #F59E0B
+skinparam ClassFontColor #F5F5F5
+skinparam ArrowColor #F59E0B
+skinparam defaultFontColor #F5F5F5
+
+enum TipoUsuario {
+  CLIENTE
+  EMPRESA
+  BANCO
+}
+
+enum StatusPedido {
+  PENDENTE
+  EM_ANALISE
+  APROVADO
+  REJEITADO
+  CANCELADO
+  EXECUTADO
+}
+
+enum TipoProprietario {
+  CLIENTE
+  EMPRESA
+  BANCO
+}
+
+class Usuario {
+  + id: String
+  + email: String
+  - senha: String
+  + tipo: TipoUsuario
+  + criadoEm: DateTime
+}
+
+class Cliente {
+  + id: String
+  + rg: String
+  + cpf: String
+  + nome: String
+  + endereco: String
+  + profissao: String
+}
+
+class Rendimento {
+  + id: String
+  + entidadeEmpregadora: String
+  + valor: Float
+}
+
+class Empresa {
+  + id: String
+  + cnpj: String
+  + nome: String
+  + endereco: String
+}
+
+class Banco {
+  + id: String
+  + cnpj: String
+  + nome: String
+  + endereco: String
+}
+
+class Automovel {
+  + id: String
+  + matricula: String
+  + ano: Int
+  + marca: String
+  + modelo: String
+  + placa: String
+  + fotoUrl: String?
+  + disponivel: Boolean
+  + proprietarioTipo: TipoProprietario
+}
+
+class PedidoAluguel {
+  + id: String
+  + dataInicio: DateTime
+  + dataFim: DateTime
+  + status: StatusPedido
+  + observacao: String?
+  + criadoEm: DateTime
+  + atualizadoEm: DateTime
+}
+
+class ContratoCredito {
+  + id: String
+  + valor: Float
+  + parcelas: Int
+  + taxaJuros: Float
+  + criadoEm: DateTime
+}
+
+' Relacionamentos
+Usuario "1" -- "0..1" Cliente   : possui >
+Usuario "1" -- "0..1" Empresa   : possui >
+Usuario "1" -- "0..1" Banco     : possui >
+
+Cliente "1" *-- "0..3" Rendimento : tem >
+
+Cliente  "1" --> "0..*" PedidoAluguel : solicita >
+Automovel "1" --> "0..*" PedidoAluguel : é alocado em >
+PedidoAluguel "1" -- "0..1" ContratoCredito : possui >
+Banco "1" --> "0..*" ContratoCredito  : concede >
+Usuario "1" --> "0..*" PedidoAluguel  : avalia > (avaliador)
+
+Automovel "0..*" --> "0..1" Cliente  : pertence a >
+Automovel "0..*" --> "0..1" Empresa  : pertence a >
+Automovel "0..*" --> "0..1" Banco    : pertence a >
+
+@enduml

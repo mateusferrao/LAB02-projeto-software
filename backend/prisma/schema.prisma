@@ -1,0 +1,163 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Enums ─────────────────────────────────────────────────────
+
+enum TipoUsuario {
+  CLIENTE
+  EMPRESA
+  BANCO
+}
+
+enum TipoProprietario {
+  CLIENTE
+  EMPRESA
+  BANCO
+}
+
+enum StatusPedido {
+  PENDENTE
+  EM_ANALISE
+  APROVADO
+  REJEITADO
+  CANCELADO
+  EXECUTADO
+}
+
+// ── Usuário base (auth) ───────────────────────────────────────
+
+model Usuario {
+  id        String      @id @default(uuid())
+  email     String      @unique
+  senha     String
+  tipo      TipoUsuario
+  criadoEm DateTime    @default(now())
+
+  cliente          Cliente?
+  empresa          Empresa?
+  banco            Banco?
+  pedidosAvaliados PedidoAluguel[] @relation("Avaliador")
+}
+
+// ── Cliente (pessoa física) ───────────────────────────────────
+
+model Cliente {
+  id        String   @id @default(uuid())
+  usuarioId String   @unique
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  rg        String
+  cpf       String   @unique
+  nome      String
+  endereco  String
+  profissao String
+
+  rendimentos Rendimento[]
+  pedidos     PedidoAluguel[]
+  automoveis  Automovel[]    @relation("ProprietarioCliente")
+}
+
+// ── Rendimento (max 3 por cliente) ───────────────────────────
+
+model Rendimento {
+  id                  String  @id @default(uuid())
+  clienteId           String
+  cliente             Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  entidadeEmpregadora String
+  valor               Float
+}
+
+// ── Empresa (agente) ─────────────────────────────────────────
+
+model Empresa {
+  id        String  @id @default(uuid())
+  usuarioId String  @unique
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  cnpj      String  @unique
+  nome      String
+  endereco  String
+
+  automoveis Automovel[] @relation("ProprietarioEmpresa")
+}
+
+// ── Banco (agente) ────────────────────────────────────────────
+
+model Banco {
+  id        String  @id @default(uuid())
+  usuarioId String  @unique
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  cnpj      String  @unique
+  nome      String
+  endereco  String
+
+  contratos  ContratoCredito[]
+  automoveis Automovel[]       @relation("ProprietarioBanco")
+}
+
+// ── Automóvel ─────────────────────────────────────────────────
+
+model Automovel {
+  id                String           @id @default(uuid())
+  matricula         String           @unique
+  ano               Int
+  marca             String
+  modelo            String
+  placa             String           @unique
+  fotoUrl           String?
+  disponivel        Boolean          @default(true)
+  proprietarioTipo  TipoProprietario
+
+  proprietarioCliente   Cliente? @relation("ProprietarioCliente", fields: [proprietarioClienteId], references: [id])
+  proprietarioClienteId String?
+  proprietarioEmpresa   Empresa? @relation("ProprietarioEmpresa", fields: [proprietarioEmpresaId], references: [id])
+  proprietarioEmpresaId String?
+  proprietarioBanco     Banco?   @relation("ProprietarioBanco", fields: [proprietarioBancoId], references: [id])
+  proprietarioBancoId   String?
+
+  pedidos PedidoAluguel[]
+}
+
+// ── Pedido de Aluguel ─────────────────────────────────────────
+
+model PedidoAluguel {
+  id          String       @id @default(uuid())
+  clienteId   String
+  cliente     Cliente      @relation(fields: [clienteId], references: [id])
+  automovelId String
+  automovel   Automovel    @relation(fields: [automovelId], references: [id])
+  dataInicio  DateTime
+  dataFim     DateTime
+  status      StatusPedido @default(PENDENTE)
+  observacao  String?
+
+  avaliadorId String?
+  avaliador   Usuario? @relation("Avaliador", fields: [avaliadorId], references: [id])
+
+  contrato ContratoCredito?
+
+  criadoEm    DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+}
+
+// ── Contrato de Crédito ───────────────────────────────────────
+
+model ContratoCredito {
+  id        String        @id @default(uuid())
+  pedidoId  String        @unique
+  pedido    PedidoAluguel @relation(fields: [pedidoId], references: [id])
+  bancoId   String
+  banco     Banco         @relation(fields: [bancoId], references: [id])
+  valor     Float
+  parcelas  Int
+  taxaJuros Float
+  criadoEm DateTime      @default(now())
+}

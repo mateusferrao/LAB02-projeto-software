@@ -1,0 +1,51 @@
+@startuml Diagrama de Componentes — Sistema de Aluguel de Carros
+
+skinparam backgroundColor #0A0A0A
+skinparam componentBackgroundColor #1C1C1C
+skinparam componentBorderColor #F59E0B
+skinparam interfaceBackgroundColor #F59E0B
+skinparam interfaceBorderColor #F59E0B
+skinparam ArrowColor #F59E0B
+skinparam defaultFontColor #F5F5F5
+skinparam nodeBackgroundColor #111
+
+node "Container: frontend\n(Nginx :80)" {
+  component [React SPA] as SPA {
+    component [Páginas] as Pages
+    component [Componentes UI] as UI
+    component [AuthContext] as AC
+    component [API Client (Axios)] as AxiosC
+  }
+}
+
+node "Container: backend\n(Node.js :3001)" {
+  component [Express App] as Express {
+    component [Rotas] as Routes
+    component [Controllers] as Controllers
+    component [Services (Regras de Negócio)] as Services
+    component [Middlewares] as MW
+  }
+  component [Prisma ORM] as Prisma
+}
+
+node "Container: db\n(PostgreSQL :5432)" {
+  database [PostgreSQL 16] as PG
+}
+
+[SPA] --> [Express] : HTTP/REST (JSON)\nJWT Bearer Token
+[Express] --> [Prisma] : Queries
+[Prisma] --> [PG] : TCP/IP
+
+interface "GET /automoveis"         as I1
+interface "POST /auth/login"        as I2
+interface "POST /pedidos"           as I3
+interface "PATCH /pedidos/:id/avaliar" as I4
+interface "GET /pedidos"            as I5
+
+[Routes] -- I1
+[Routes] -- I2
+[Routes] -- I3
+[Routes] -- I4
+[Routes] -- I5
+
+@enduml
