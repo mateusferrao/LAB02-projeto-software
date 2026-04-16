@@ -1,7 +1,7 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import { Calendar, Hash, Car, ArrowLeft } from 'lucide-react'
+import { Calendar, Hash, Car, ArrowLeft, Pencil, Trash2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useState } from 'react'
 import api from '../services/api'
@@ -19,9 +19,12 @@ interface PedidoForm {
 export function DetalheCarro() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { isAuthenticated, user } = useAuth()
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [manageError, setManageError] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const { data: car, isLoading } = useQuery<Automovel>({
     queryKey: ['automovel', id],
@@ -47,6 +50,30 @@ export function DetalheCarro() {
     }
   }
 
+  const onDelete = async () => {
+    if (!id) {
+      setManageError('Veículo inválido para exclusão.')
+      return
+    }
+
+    const ok = window.confirm('Tem certeza que deseja excluir este veículo? Esta ação não pode ser desfeita.')
+    if (!ok) return
+
+    try {
+      setManageError('')
+      setIsDeleting(true)
+      await api.delete(`/automoveis/${id}`)
+      queryClient.invalidateQueries({ queryKey: ['automoveis'] })
+      queryClient.invalidateQueries({ queryKey: ['automovel', id] })
+      navigate('/catalogo')
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error
+      setManageError(msg ?? 'Não foi possível excluir o veículo.')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   if (isLoading) return (
     <div className="min-h-screen pt-20 flex items-center justify-center">
       <div className="w-12 h-12 border-2 border-brand-amber border-t-transparent rounded-full animate-spin" />
@@ -60,6 +87,18 @@ export function DetalheCarro() {
   )
 
   const hoje = new Date().toISOString().split('T')[0]
+  const userExtra = user as typeof user & {
+    empresa_id?: string
+    banco_id?: string
+    perfil?: { id?: string }
+  }
+  const empresaId = user?.empresa?.id ?? userExtra?.empresa_id ?? (user?.tipo === 'EMPRESA' ? userExtra?.perfil?.id : undefined)
+  const bancoId = user?.banco?.id ?? userExtra?.banco_id ?? (user?.tipo === 'BANCO' ? userExtra?.perfil?.id : undefined)
+  const proprietarioEmpresaId = car.proprietarioEmpresaId ?? car.proprietario_empresa_id
+  const proprietarioBancoId = car.proprietarioBancoId ?? car.proprietario_banco_id
+  const canManageCar =
+    (user?.tipo === 'EMPRESA' && !!empresaId && proprietarioEmpresaId === empresaId)
+    || (user?.tipo === 'BANCO' && !!bancoId && proprietarioBancoId === bancoId)
 
   return (
     <div className="min-h-screen pt-20 pb-16 px-4">
@@ -109,6 +148,30 @@ export function DetalheCarro() {
               ))}
             </div>
 
+            {canManageCar && (
+              <div className="card p-5 mb-8">
+                <p className="text-white/60 text-sm mb-3">Gerenciamento do registro</p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link to={`/editar-carro/${car.id}`} className="btn-primary flex-1 inline-flex items-center justify-center gap-2">
+                    <Pencil className="w-4 h-4" /> Editar dados
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={onDelete}
+                    disabled={isDeleting}
+                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-red-400 text-sm hover:bg-red-500/20 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" /> {isDeleting ? 'Excluindo...' : 'Excluir registro'}
+                  </button>
+                </div>
+                {manageError && (
+                  <p className="mt-3 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-red-400 text-sm">
+                    {manageError}
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Formulário de pedido */}
             {car.disponivel && (
               <>
@@ -118,9 +181,11 @@ export function DetalheCarro() {
                     <Link to="/login" className="btn-primary">Entrar</Link>
                   </div>
                 ) : user?.tipo !== 'CLIENTE' ? (
+                  canManageCar ? null : (
                   <div className="card p-6 text-center text-white/40">
                     Somente clientes podem solicitar aluguéis.
                   </div>
+                  )
                 ) : success ? (
                   <div className="card p-6 text-center">
                     <p className="text-green-400 text-lg font-semibold mb-2">Pedido criado!</p>
