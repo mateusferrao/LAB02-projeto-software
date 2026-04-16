@@ -2,14 +2,19 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { Calendar, CheckCircle, XCircle, Clock } from 'lucide-react'
-import api from '../services/api'
+import api, { automovelFotoUrl, pedidoDataFim, pedidoDataInicio } from '../services/api'
 import type { PedidoAluguel } from '../services/api'
 import { StatusBadge } from '../components/StatusBadge'
 import { useAuth } from '../contexts/AuthContext'
 import { useForm } from 'react-hook-form'
 
 const FALLBACK = 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&q=80'
-function fmt(d: string) { return new Date(d).toLocaleDateString('pt-BR') }
+function fmt(d?: string) {
+  if (!d) return 'Data indisponível'
+  const parsed = new Date(d)
+  if (Number.isNaN(parsed.getTime())) return 'Data indisponível'
+  return parsed.toLocaleDateString('pt-BR')
+}
 
 interface ContratoForm {
   valor: number
@@ -94,7 +99,7 @@ export function PainelAgente() {
                 className="card p-5 flex gap-4"
               >
                 <img
-                  src={p.automovel?.fotoUrl ?? FALLBACK}
+                  src={automovelFotoUrl(p.automovel) ?? FALLBACK}
                   alt={p.automovel?.modelo}
                   className="w-24 h-20 object-cover rounded-xl flex-shrink-0"
                   onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK }}
@@ -111,7 +116,7 @@ export function PainelAgente() {
 
                   <div className="flex items-center gap-1 text-white/40 text-xs mt-1">
                     <Calendar className="w-3.5 h-3.5" />
-                    {fmt(p.dataInicio)} — {fmt(p.dataFim)}
+                    {fmt(pedidoDataInicio(p))} — {fmt(pedidoDataFim(p))}
                   </div>
 
                   {/* Ações */}

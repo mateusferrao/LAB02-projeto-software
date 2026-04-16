@@ -6,11 +6,13 @@ import clienteRoutes from './routes/cliente.routes'
 import automovelRoutes from './routes/automovel.routes'
 import pedidoRoutes from './routes/pedido.routes'
 import { errorHandler } from './middlewares/errorHandler'
+import { initDatabase } from './config/initDb'
 
 const app = express()
 
 app.use(cors({ origin: '*', credentials: true }))
-app.use(express.json())
+app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 // ── Health check ──────────────────────────────────────────────
 app.get('/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date() }))
@@ -25,8 +27,18 @@ app.use('/pedidos', pedidoRoutes)
 app.use(errorHandler)
 
 const PORT = Number(process.env.PORT ?? 3001)
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚗 Servidor rodando em http://0.0.0.0:${PORT}`)
+
+async function bootstrap() {
+  await initDatabase()
+
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚗 Servidor rodando em http://0.0.0.0:${PORT}`)
+  })
+}
+
+bootstrap().catch((err) => {
+  console.error('Erro ao iniciar aplicação:', err)
+  process.exit(1)
 })
 
 export default app

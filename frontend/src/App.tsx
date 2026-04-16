@@ -10,6 +10,7 @@ import { Catalogo } from './pages/Catalogo'
 import { DetalheCarro } from './pages/DetalheCarro'
 import { MeusPedidos } from './pages/MeusPedidos'
 import { PainelAgente } from './pages/PainelAgente'
+import { CadastroCarro } from './pages/CadastroCarro'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -42,6 +43,15 @@ export default function App() {
               element={
                 <ProtectedRoute roles={['EMPRESA', 'BANCO']}>
                   <PainelAgente />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/cadastrar-carro"
+              element={
+                <ProtectedRoute roles={['EMPRESA', 'BANCO']}>
+                  <CadastroCarro />
                 </ProtectedRoute>
               }
             />

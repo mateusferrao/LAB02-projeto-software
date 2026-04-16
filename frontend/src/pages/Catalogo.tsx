@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import { Search, SlidersHorizontal } from 'lucide-react'
+import { Search, SlidersHorizontal, Car } from 'lucide-react'
 import api from '../services/api'
 import type { Automovel } from '../services/api'
 import { CarCard } from '../components/CarCard'
@@ -66,7 +66,7 @@ export function Catalogo() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-24 text-white/30">
-            <p className="text-6xl mb-4">🚗</p>
+            <Car className="w-16 h-16 mx-auto mb-4 opacity-20" />
             <p className="text-xl">Nenhum veículo encontrado</p>
           </div>
         ) : (

@@ -1,14 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { Calendar, Car, XCircle } from 'lucide-react'
-import api from '../services/api'
+import api, { automovelFotoUrl, pedidoDataFim, pedidoDataInicio } from '../services/api'
 import type { PedidoAluguel } from '../services/api'
 import { StatusBadge } from '../components/StatusBadge'
 
 const FALLBACK = 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&q=80'
 
-function fmt(d: string) {
-  return new Date(d).toLocaleDateString('pt-BR')
+function fmt(d?: string) {
+  if (!d) return 'Data indisponível'
+  const parsed = new Date(d)
+  if (Number.isNaN(parsed.getTime())) return 'Data indisponível'
+  return parsed.toLocaleDateString('pt-BR')
 }
 
 export function MeusPedidos() {
@@ -54,7 +57,7 @@ export function MeusPedidos() {
               >
                 {/* Thumb */}
                 <img
-                  src={p.automovel?.fotoUrl ?? FALLBACK}
+                  src={automovelFotoUrl(p.automovel) ?? FALLBACK}
                   alt={p.automovel?.modelo}
                   className="w-24 h-20 object-cover rounded-xl flex-shrink-0"
                   onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK }}
@@ -71,7 +74,7 @@ export function MeusPedidos() {
                   <div className="flex items-center gap-4 text-white/40 text-sm mt-1">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
-                      {fmt(p.dataInicio)} — {fmt(p.dataFim)}
+                      {fmt(pedidoDataInicio(p))} — {fmt(pedidoDataFim(p))}
                     </span>
                   </div>
 

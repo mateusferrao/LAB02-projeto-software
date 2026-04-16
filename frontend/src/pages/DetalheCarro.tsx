@@ -5,7 +5,7 @@ import { Calendar, Hash, Car, ArrowLeft } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useState } from 'react'
 import api from '../services/api'
-import type { Automovel } from '../services/api'
+import { automovelFotoUrl, type Automovel } from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
 
 const FALLBACK = 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&q=80'
@@ -76,7 +76,7 @@ export function DetalheCarro() {
             className="rounded-2xl overflow-hidden h-80 lg:h-auto"
           >
             <img
-              src={car.fotoUrl ?? FALLBACK}
+              src={automovelFotoUrl(car) ?? FALLBACK}
               alt={`${car.marca} ${car.modelo}`}
               className="w-full h-full object-cover"
               onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK }}

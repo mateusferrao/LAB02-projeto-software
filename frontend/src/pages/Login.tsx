@@ -112,14 +112,6 @@ export function Login() {
             Não tem conta?{' '}
             <Link to="/register" className="text-brand-amber hover:underline">Cadastre-se</Link>
           </p>
-
-          {/* Dica de credenciais de teste */}
-          <div className="mt-8 p-4 rounded-lg border border-white/5 bg-white/3">
-            <p className="text-white/30 text-xs mb-2 font-semibold uppercase tracking-widest">Contas de teste (seed)</p>
-            <p className="text-white/40 text-xs">cliente@exemplo.com / 123456</p>
-            <p className="text-white/40 text-xs">empresa@exemplo.com / 123456</p>
-            <p className="text-white/40 text-xs">banco@exemplo.com / 123456</p>
-          </div>
         </motion.div>
       </div>
     </div>

@@ -85,8 +85,13 @@ export interface Automovel {
   modelo: string
   placa: string
   fotoUrl?: string
+  foto_url?: string
   disponivel: boolean
   proprietarioTipo: 'CLIENTE' | 'EMPRESA' | 'BANCO'
+  proprietarioEmpresaId?: string
+  proprietario_empresa_id?: string
+  proprietarioBancoId?: string
+  proprietario_banco_id?: string
 }
 
 export interface PedidoAluguel {
@@ -95,6 +100,8 @@ export interface PedidoAluguel {
   automovelId: string
   dataInicio: string
   dataFim: string
+  data_inicio?: string
+  data_fim?: string
   status: StatusPedido
   observacao?: string
   criadoEm: string
@@ -112,4 +119,19 @@ export interface ContratoCredito {
   parcelas: number
   taxaJuros: number
   criadoEm: string
+}
+
+export function automovelFotoUrl(automovel?: Automovel | null) {
+  if (!automovel) return undefined
+  return automovel.fotoUrl ?? automovel.foto_url
+}
+
+export function pedidoDataInicio(pedido?: PedidoAluguel | null) {
+  if (!pedido) return undefined
+  return pedido.dataInicio ?? pedido.data_inicio
+}
+
+export function pedidoDataFim(pedido?: PedidoAluguel | null) {
+  if (!pedido) return undefined
+  return pedido.dataFim ?? pedido.data_fim
 }

@@ -45,6 +45,12 @@ export function Navbar() {
             </Link>
           )}
 
+          {isAuthenticated && isAgente && (
+            <Link to="/cadastrar-carro" className="text-white/70 hover:text-brand-amber transition-colors text-sm font-medium">
+              Cadastrar Carro
+            </Link>
+          )}
+
           {isAuthenticated ? (
             <div className="flex items-center gap-3">
               <span className="text-white/40 text-sm flex items-center gap-1">
@@ -79,6 +85,9 @@ export function Navbar() {
           )}
           {isAuthenticated && isAgente && (
             <Link to="/painel-agente" className="text-white/70 hover:text-brand-amber" onClick={() => setOpen(false)}>Painel</Link>
+          )}
+          {isAuthenticated && isAgente && (
+            <Link to="/cadastrar-carro" className="text-white/70 hover:text-brand-amber" onClick={() => setOpen(false)}>Cadastrar Carro</Link>
           )}
           {isAuthenticated ? (
             <button onClick={() => { handleLogout(); setOpen(false) }} className="btn-outline text-left">Sair</button>

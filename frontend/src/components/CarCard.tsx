@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { Calendar, Tag, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import type { Automovel } from '../services/api'
+import { automovelFotoUrl, type Automovel } from '../services/api'
 
 interface Props {
   car: Automovel
@@ -19,7 +19,7 @@ export function CarCard({ car }: Props) {
       {/* Imagem */}
       <div className="relative h-52 overflow-hidden">
         <img
-          src={car.fotoUrl ?? FALLBACK}
+          src={automovelFotoUrl(car) ?? FALLBACK}
           alt={`${car.marca} ${car.modelo}`}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK }}

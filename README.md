@@ -24,12 +24,12 @@ O sistema é **totalmente containerizado** com Docker Compose, composto por **tr
 │  │  Nginx :80   │             │  Node.js/Express :3001   │  │
 │  │  (React SPA) │ ◄────────── │  Prisma ORM              │  │
 │  └──────────────┘    JSON     └────────────┬─────────────┘  │
-│       ▲                                    │ TCP             │
-│       │ :5173                              ▼                 │
+│       ▲                                    │ TCP            │
+│       │ :5173                              ▼                │
 │  [ Navegador ]               ┌─────────────────────────┐    │
-│                              │           db             │    │
-│                              │  PostgreSQL 16 :5432     │    │
-│                              │  Volume: pgdata          │    │
+│                              │           db            │    │
+│                              │  PostgreSQL 16 :5432    │    │
+│                              │  Volume: pgdata         │    │
 │                              └─────────────────────────┘    │
 └─────────────────────────────────────────────────────────────┘
 ```
