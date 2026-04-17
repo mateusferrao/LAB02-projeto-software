@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { Car, LogOut, Menu, X, User, LayoutDashboard } from 'lucide-react'
+import { Car, LogOut, Menu, X, User, LayoutDashboard, Presentation } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -28,6 +28,11 @@ export function Navbar() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6">
+          <Link to="/apresentacao" className="text-white/70 hover:text-brand-amber transition-colors text-sm font-medium flex items-center gap-1">
+            <Presentation className="w-4 h-4" />
+            Apresentação
+          </Link>
+          
           <Link to="/catalogo" className="text-white/70 hover:text-brand-amber transition-colors text-sm font-medium">
             Catálogo
           </Link>
@@ -80,6 +85,7 @@ export function Navbar() {
       {open && (
         <div className="md:hidden bg-brand-graphite border-t border-white/5 px-4 py-4 flex flex-col gap-4">
           <Link to="/catalogo" className="text-white/70 hover:text-brand-amber" onClick={() => setOpen(false)}>Catálogo</Link>
+          <Link to="/apresentacao" className="text-white/70 hover:text-brand-amber" onClick={() => setOpen(false)}>Apresentação</Link>
           {isAuthenticated && !isAgente && (
             <Link to="/meus-pedidos" className="text-white/70 hover:text-brand-amber" onClick={() => setOpen(false)}>Meus Pedidos</Link>
           )}

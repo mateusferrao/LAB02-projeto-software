@@ -12,6 +12,7 @@ import { MeusPedidos } from './pages/MeusPedidos'
 import { PainelAgente } from './pages/PainelAgente'
 import { CadastroCarro } from './pages/CadastroCarro'
 import { EditarCarro } from './pages/EditarCarro'
+import { Apresentacao } from './pages/Apresentacao'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -29,6 +30,7 @@ export default function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/catalogo" element={<Catalogo />} />
             <Route path="/catalogo/:id" element={<DetalheCarro />} />
+            <Route path="/apresentacao" element={<Apresentacao />} />
 
             <Route
               path="/meus-pedidos"
