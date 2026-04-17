@@ -43,7 +43,7 @@ import {
 
 type SlideProps = { mx: any; my: any }
 
-const SLIDE_COUNT = 6
+const SLIDE_COUNT = 7
 
 /* ──────────────────────────────────────────────────────────────
  * Background — blobs animados + grid sutil
@@ -326,23 +326,23 @@ const uxPrinciples = [
   { Icon: Accessibility, title: 'Contraste AAA', desc: 'Âmbar sobre preto garante leitura mesmo em luz forte.' },
 ]
 
-function SlideDesign() {
+function SlideDesignA() {
   return (
-    <div className="h-full w-full flex flex-col items-center justify-center px-6 overflow-y-auto">
+    <div className="h-full w-full flex flex-col items-center justify-center px-6">
       <motion.h2
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         className="font-display text-5xl md:text-7xl tracking-wider text-brand-offwhite mb-2"
       >
-        DESIGN <span className="text-brand-amber">&amp;</span> IDENTIDADE
+        DESIGN <span className="text-brand-amber">I</span>
       </motion.h2>
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="text-white/60 mb-8 text-center max-w-2xl"
+        className="text-white/60 mb-10 text-center max-w-2xl"
       >
-        Estética automotiva premium: preto profundo, âmbar vibrante e tipografia que lembra pista.
+        Paleta e tipografia — a base da identidade premium automotiva.
       </motion.p>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl w-full">
@@ -351,13 +351,13 @@ function SlideDesign() {
           initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3 }}
-          className="card p-5"
+          className="card p-6"
         >
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-5">
             <Droplet className="w-5 h-5 text-brand-amber" />
             <h3 className="font-display text-2xl tracking-widest text-brand-offwhite">PALETA</h3>
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-3">
             {palette.map((c, i) => (
               <motion.div
                 key={c.hex}
@@ -368,7 +368,7 @@ function SlideDesign() {
                 className="rounded-lg overflow-hidden border border-white/10"
               >
                 <motion.div
-                  className="h-16 flex items-end p-2"
+                  className="h-20 flex items-end p-2"
                   style={{ backgroundColor: c.hex }}
                   animate={{ boxShadow: [`0 0 0 0 ${c.hex}00`, `0 0 20px 2px ${c.hex}66`, `0 0 0 0 ${c.hex}00`] }}
                   transition={{ duration: 3, repeat: Infinity, delay: i * 0.2 }}
@@ -391,9 +391,9 @@ function SlideDesign() {
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.4 }}
-          className="card p-5"
+          className="card p-6"
         >
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-5">
             <Type className="w-5 h-5 text-brand-amber" />
             <h3 className="font-display text-2xl tracking-widest text-brand-offwhite">TIPOGRAFIA</h3>
           </div>
@@ -402,13 +402,13 @@ function SlideDesign() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.55 }}
-            className="mb-5 pb-5 border-b border-white/10"
+            className="mb-6 pb-6 border-b border-white/10"
           >
             <div className="text-[10px] uppercase tracking-widest text-brand-amber mb-1">Display</div>
-            <div className="font-display text-4xl md:text-5xl tracking-widest text-brand-offwhite leading-none">
+            <div className="font-display text-5xl md:text-6xl tracking-widest text-brand-offwhite leading-none">
               BEBAS NEUE
             </div>
-            <div className="text-xs text-white/50 mt-2">Títulos, logo, marcos visuais — vibe automotiva.</div>
+            <div className="text-xs text-white/50 mt-3">Títulos, logo, marcos visuais — vibe automotiva.</div>
           </motion.div>
 
           <motion.div
@@ -421,71 +421,106 @@ function SlideDesign() {
               Inter — <span className="font-light">light</span> <span className="font-normal">regular</span>{' '}
               <span className="font-semibold">semibold</span> <span className="font-bold">bold</span>
             </div>
-            <div className="text-xs text-white/50 mt-2">Corpo de texto, UI, labels — legível em qualquer tamanho.</div>
+            <div className="text-xs text-white/50 mt-3">Corpo de texto, UI e labels — legível em qualquer tamanho.</div>
           </motion.div>
         </motion.div>
+      </div>
+    </div>
+  )
+}
 
+function SlideDesignB() {
+  return (
+    <div className="h-full w-full flex flex-col items-center justify-center px-6">
+      <motion.h2
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="font-display text-5xl md:text-7xl tracking-wider text-brand-offwhite mb-2"
+      >
+        DESIGN <span className="text-brand-amber">II</span>
+      </motion.h2>
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="text-white/60 mb-10 text-center max-w-2xl"
+      >
+        Componentes e princípios de UI/UX que amarram a experiência.
+      </motion.p>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl w-full">
         {/* Componentes */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.55 }}
-          className="card p-5"
+          initial={{ opacity: 0, x: -40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
+          className="card p-6"
         >
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-5">
             <Sparkles className="w-5 h-5 text-brand-amber" />
             <h3 className="font-display text-2xl tracking-widest text-brand-offwhite">COMPONENTES</h3>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <motion.button whileHover={{ scale: 1.05 }} className="btn-primary py-2 px-4 text-sm">
-              Primary
-            </motion.button>
-            <motion.button whileHover={{ scale: 1.05 }} className="btn-outline py-2 px-4 text-sm">
-              Outline
-            </motion.button>
-            <motion.button whileHover={{ scale: 1.05 }} className="btn-ghost py-2 px-4 text-sm">
-              Ghost
-            </motion.button>
-            <span className="px-3 py-1 rounded-full text-xs bg-green-500/15 text-green-400 border border-green-500/30">
-              APROVADO
-            </span>
-            <span className="px-3 py-1 rounded-full text-xs bg-yellow-500/15 text-yellow-400 border border-yellow-500/30">
-              PENDENTE
-            </span>
-            <span className="px-3 py-1 rounded-full text-xs bg-blue-500/15 text-blue-400 border border-blue-500/30">
-              EM ANÁLISE
-            </span>
+
+          <div className="mb-4">
+            <div className="text-[10px] uppercase tracking-widest text-brand-amber mb-2">Botões</div>
+            <div className="flex flex-wrap items-center gap-3">
+              <motion.button whileHover={{ scale: 1.05 }} className="btn-primary py-2 px-4 text-sm">
+                Primary
+              </motion.button>
+              <motion.button whileHover={{ scale: 1.05 }} className="btn-outline py-2 px-4 text-sm">
+                Outline
+              </motion.button>
+              <motion.button whileHover={{ scale: 1.05 }} className="btn-ghost py-2 px-4 text-sm">
+                Ghost
+              </motion.button>
+            </div>
           </div>
-          <div className="mt-4 text-xs text-white/50">
-            Cards <code className="text-brand-amber">.card</code> com borda sutil (<code>white/5</code>), radius 2xl e
-            gradiente interno.
+
+          <div className="mb-4">
+            <div className="text-[10px] uppercase tracking-widest text-brand-amber mb-2">Badges de Status</div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-3 py-1 rounded-full text-xs bg-green-500/15 text-green-400 border border-green-500/30">
+                APROVADO
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs bg-yellow-500/15 text-yellow-400 border border-yellow-500/30">
+                PENDENTE
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs bg-blue-500/15 text-blue-400 border border-blue-500/30">
+                EM ANÁLISE
+              </span>
+            </div>
+          </div>
+
+          <div className="text-xs text-white/50 pt-3 border-t border-white/10">
+            Cards <code className="text-brand-amber">.card</code> — borda <code>white/5</code>, radius 2xl, gradiente
+            interno.
           </div>
         </motion.div>
 
         {/* Princípios UI/UX */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.65 }}
-          className="card p-5"
+          initial={{ opacity: 0, x: 40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.4 }}
+          className="card p-6"
         >
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-5">
             <MousePointer2 className="w-5 h-5 text-brand-amber" />
             <h3 className="font-display text-2xl tracking-widest text-brand-offwhite">UI / UX</h3>
           </div>
-          <ul className="space-y-3">
+          <ul className="space-y-4">
             {uxPrinciples.map((p, i) => (
               <motion.li
                 key={p.title}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.8 + i * 0.1 }}
+                transition={{ delay: 0.5 + i * 0.12 }}
                 className="flex items-start gap-3"
               >
                 <motion.div
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.6 }}
-                  className="p-1.5 rounded-md bg-brand-amber/15 text-brand-amber flex-shrink-0"
+                  className="p-2 rounded-md bg-brand-amber/15 text-brand-amber flex-shrink-0"
                 >
                   <p.Icon className="w-4 h-4" />
                 </motion.div>
@@ -810,7 +845,7 @@ function Slide5Encerramento() {
 /* ──────────────────────────────────────────────────────────────
  * Componente principal
  * ────────────────────────────────────────────────────────────── */
-const slideTitles = ['Visão Geral', 'Arquitetura', 'Design', 'Funcionalidades', 'Trade-offs', 'Obrigado']
+const slideTitles = ['Visão Geral', 'Arquitetura', 'Design I', 'Design II', 'Funcionalidades', 'Trade-offs', 'Obrigado']
 
 export function Apresentacao() {
   const [current, setCurrent] = useState(0)
@@ -849,7 +884,7 @@ export function Apresentacao() {
       }
       if (e.key === 'ArrowRight' || e.key === ' ') go(1)
       if (e.key === 'ArrowLeft') go(-1)
-      if (e.key >= '1' && e.key <= '6') goTo(parseInt(e.key, 10) - 1)
+      if (e.key >= '1' && e.key <= '7') goTo(parseInt(e.key, 10) - 1)
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
@@ -929,12 +964,14 @@ export function Apresentacao() {
       case 1:
         return <Slide2Arquitetura />
       case 2:
-        return <SlideDesign />
+        return <SlideDesignA />
       case 3:
-        return <Slide3Funcionalidades />
+        return <SlideDesignB />
       case 4:
-        return <Slide4Decisoes />
+        return <Slide3Funcionalidades />
       case 5:
+        return <Slide4Decisoes />
+      case 6:
         return <Slide5Encerramento />
       default:
         return null
