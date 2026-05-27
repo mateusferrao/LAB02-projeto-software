@@ -55,6 +55,14 @@ export async function buscarPorUsuarioId(usuarioId: string) {
   return rows[0] ?? null
 }
 
+export async function garantirClienteDoUsuario(clienteId: string, usuarioId: string) {
+  const { rows } = await db.query(
+    'SELECT id FROM cliente WHERE id = $1 AND usuario_id = $2',
+    [clienteId, usuarioId],
+  )
+  if (!rows[0]) erro('Acesso negado ao cliente informado', 403)
+}
+
 export async function atualizar(id: string, data: z.infer<typeof ClienteUpdateSchema>) {
   const sets: string[] = []
   const vals: unknown[] = []
@@ -68,6 +76,7 @@ export async function atualizar(id: string, data: z.infer<typeof ClienteUpdateSc
     `UPDATE cliente SET ${sets.join(', ')} WHERE id = $${i} RETURNING *`,
     vals,
   )
+  if (!rows[0]) erro('Cliente não encontrado', 404)
   return rows[0]
 }
 

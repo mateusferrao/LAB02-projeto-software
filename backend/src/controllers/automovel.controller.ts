@@ -16,21 +16,21 @@ export async function buscarPorId(req: Request, res: Response, next: NextFunctio
 
 export async function criar(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = AutomovelService.AutomovelSchema.parse(req.body)
-    res.status(201).json(await AutomovelService.criar(data))
+    const data = AutomovelService.AutomovelCreateSchema.parse(req.body)
+    res.status(201).json(await AutomovelService.criar(req.user!, data))
   } catch (err) { next(err) }
 }
 
 export async function atualizar(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = AutomovelService.AutomovelSchema.partial().parse(req.body)
-    res.json(await AutomovelService.atualizar(req.params.id, data))
+    const data = AutomovelService.AutomovelUpdateSchema.parse(req.body)
+    res.json(await AutomovelService.atualizar(req.params.id, req.user!, data))
   } catch (err) { next(err) }
 }
 
 export async function deletar(req: Request, res: Response, next: NextFunction) {
   try {
-    await AutomovelService.deletar(req.params.id)
+    await AutomovelService.deletar(req.params.id, req.user!)
     res.status(204).end()
   } catch (err) { next(err) }
 }

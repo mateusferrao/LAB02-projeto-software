@@ -1,11 +1,18 @@
 import { z } from 'zod'
 import db from '../config/db'
+import type { TokenPayload } from '../middlewares/auth'
 
 export const CriarPedidoSchema = z.object({
   automovelId: z.string().uuid(),
-  dataInicio: z.string(),
-  dataFim: z.string(),
+  dataInicio: z.string().datetime(),
+  dataFim: z.string().datetime(),
   observacao: z.string().optional(),
+}).refine((data) => new Date(data.dataFim) >= new Date(data.dataInicio), {
+  message: 'Data final deve ser maior ou igual à data inicial',
+  path: ['dataFim'],
+}).refine((data) => inicioDoDia(new Date(data.dataInicio)) >= inicioDoDia(new Date()), {
+  message: 'Data inicial não pode estar no passado',
+  path: ['dataInicio'],
 })
 
 export const AvaliarPedidoSchema = z.object({
@@ -22,19 +29,33 @@ export const ContratoCreditoSchema = z.object({
 })
 
 export async function criar(clienteId: string, data: z.infer<typeof CriarPedidoSchema>) {
-  const { rows: autos } = await db.query(
-    'SELECT id, disponivel FROM automovel WHERE id = $1', [data.automovelId],
-  )
-  if (!autos[0]) erro('Automóvel não encontrado', 404)
-  if (!autos[0].disponivel) erro('Automóvel não está disponível', 409)
+  const client = await db.connect()
+  try {
+    await client.query('BEGIN')
 
-  const { rows } = await db.query(
-    `INSERT INTO pedido_aluguel (cliente_id, automovel_id, data_inicio, data_fim, observacao)
-     VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-    [clienteId, data.automovelId, data.dataInicio, data.dataFim, data.observacao ?? null],
-  )
+    const { rows: autos } = await client.query(
+      'SELECT id, disponivel FROM automovel WHERE id = $1 FOR UPDATE',
+      [data.automovelId],
+    )
+    if (!autos[0]) erro('Automóvel não encontrado', 404)
+    if (!autos[0].disponivel) erro('Automóvel não está disponível', 409)
 
-  return buscarPorId(rows[0].id)
+    const { rows } = await client.query(
+      `INSERT INTO pedido_aluguel (cliente_id, automovel_id, data_inicio, data_fim, observacao)
+       VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+      [clienteId, data.automovelId, data.dataInicio, data.dataFim, data.observacao ?? null],
+    )
+
+    await client.query('UPDATE automovel SET disponivel = FALSE WHERE id = $1', [data.automovelId])
+    await client.query('COMMIT')
+
+    return buscarPorId(rows[0].id)
+  } catch (e) {
+    await client.query('ROLLBACK')
+    throw e
+  } finally {
+    client.release()
+  }
 }
 
 export async function listarDoCliente(clienteId: string) {
@@ -85,37 +106,83 @@ export async function buscarPorId(id: string) {
 }
 
 export async function cancelar(id: string, clienteId: string) {
-  const { rows } = await db.query(
-    'SELECT id, cliente_id, status FROM pedido_aluguel WHERE id = $1', [id],
-  )
-  if (!rows[0]) erro('Pedido não encontrado', 404)
-  if (rows[0].cliente_id !== clienteId) erro('Acesso negado', 403)
-  if (!['PENDENTE', 'EM_ANALISE'].includes(rows[0].status)) {
-    erro('Pedido não pode ser cancelado neste status', 400)
-  }
+  const client = await db.connect()
+  try {
+    await client.query('BEGIN')
 
-  const { rows: updated } = await db.query(
-    `UPDATE pedido_aluguel SET status = 'CANCELADO' WHERE id = $1 RETURNING *`,
-    [id],
-  )
-  return updated[0]
+    const { rows } = await client.query(
+      `SELECT id, cliente_id, automovel_id, status
+       FROM pedido_aluguel
+       WHERE id = $1
+       FOR UPDATE`,
+      [id],
+    )
+    if (!rows[0]) erro('Pedido não encontrado', 404)
+    if (rows[0].cliente_id !== clienteId) erro('Acesso negado', 403)
+    if (!['PENDENTE', 'EM_ANALISE'].includes(rows[0].status)) {
+      erro('Pedido não pode ser cancelado neste status', 400)
+    }
+
+    const { rows: updated } = await client.query(
+      `UPDATE pedido_aluguel SET status = 'CANCELADO' WHERE id = $1 RETURNING *`,
+      [id],
+    )
+    await client.query('UPDATE automovel SET disponivel = TRUE WHERE id = $1', [rows[0].automovel_id])
+    await client.query('COMMIT')
+    return updated[0]
+  } catch (e) {
+    await client.query('ROLLBACK')
+    throw e
+  } finally {
+    client.release()
+  }
 }
 
 export async function avaliar(
   id: string,
-  avaliadorId: string,
+  avaliador: TokenPayload,
   data: z.infer<typeof AvaliarPedidoSchema>,
 ) {
-  const { rows } = await db.query('SELECT id FROM pedido_aluguel WHERE id = $1', [id])
-  if (!rows[0]) erro('Pedido não encontrado', 404)
+  const client = await db.connect()
+  try {
+    await client.query('BEGIN')
 
-  const { rows: updated } = await db.query(
-    `UPDATE pedido_aluguel
-     SET status = $1, avaliador_id = $2, observacao = COALESCE($3, observacao)
-     WHERE id = $4 RETURNING *`,
-    [data.status, avaliadorId, data.observacao ?? null, id],
-  )
-  return buscarPorId(updated[0].id)
+    const { rows } = await client.query(
+      `SELECT p.id, p.status, p.automovel_id,
+              a.proprietario_tipo, a.proprietario_empresa_id, a.proprietario_banco_id
+       FROM pedido_aluguel p
+       JOIN automovel a ON a.id = p.automovel_id
+       WHERE p.id = $1
+       FOR UPDATE OF p`,
+      [id],
+    )
+    const pedido = rows[0]
+    if (!pedido) erro('Pedido não encontrado', 404)
+    if (!['PENDENTE', 'EM_ANALISE'].includes(pedido.status)) {
+      erro('Pedido não pode ser avaliado neste status', 400)
+    }
+
+    await garantirAvaliadorDoAutomovel(avaliador, pedido)
+
+    const { rows: updated } = await client.query(
+      `UPDATE pedido_aluguel
+       SET status = $1, avaliador_id = $2, observacao = COALESCE($3, observacao)
+       WHERE id = $4 RETURNING *`,
+      [data.status, avaliador.id, data.observacao ?? null, id],
+    )
+
+    if (data.status === 'REJEITADO') {
+      await client.query('UPDATE automovel SET disponivel = TRUE WHERE id = $1', [pedido.automovel_id])
+    }
+
+    await client.query('COMMIT')
+    return buscarPorId(updated[0].id)
+  } catch (e) {
+    await client.query('ROLLBACK')
+    throw e
+  } finally {
+    client.release()
+  }
 }
 
 export async function criarContratoCredito(data: z.infer<typeof ContratoCreditoSchema>) {
@@ -151,4 +218,38 @@ function erro(msg: string, status: number): never {
   const e = new Error(msg) as Error & { status: number }
   e.status = status
   throw e
+}
+
+function inicioDoDia(date: Date) {
+  const d = new Date(date)
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+async function garantirAvaliadorDoAutomovel(
+  avaliador: TokenPayload,
+  automovel: {
+    proprietario_tipo: string
+    proprietario_empresa_id: string | null
+    proprietario_banco_id: string | null
+  },
+) {
+  if (!['EMPRESA', 'BANCO'].includes(avaliador.tipo)) {
+    erro('Acesso negado para avaliação de pedido', 403)
+  }
+
+  const tabela = avaliador.tipo === 'EMPRESA' ? 'empresa' : 'banco'
+  const { rows } = await db.query<{ id: string }>(
+    `SELECT id FROM ${tabela} WHERE usuario_id = $1`,
+    [avaliador.id],
+  )
+  if (!rows[0]) erro(`Perfil de ${avaliador.tipo.toLowerCase()} não encontrado`, 404)
+
+  const pertenceAoAvaliador =
+    (avaliador.tipo === 'EMPRESA' && automovel.proprietario_empresa_id === rows[0].id)
+    || (avaliador.tipo === 'BANCO' && automovel.proprietario_banco_id === rows[0].id)
+
+  if (automovel.proprietario_tipo !== avaliador.tipo || !pertenceAoAvaliador) {
+    erro('Acesso negado ao pedido informado', 403)
+  }
 }
