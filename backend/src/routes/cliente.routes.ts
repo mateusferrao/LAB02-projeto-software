@@ -9,9 +9,9 @@ router.use(authenticate)
 // Perfil do próprio cliente logado
 router.get('/me', requireRole('CLIENTE'), ClienteController.meuPerfil)
 
-// CRUD (agentes e admin podem ver todos; cliente vê só o próprio)
-router.get('/', ClienteController.listar)
-router.get('/:id', ClienteController.buscarPorId)
+// Consulta geral restrita a agentes; cliente comum usa /me
+router.get('/', requireRole('EMPRESA', 'BANCO'), ClienteController.listar)
+router.get('/:id', requireRole('EMPRESA', 'BANCO'), ClienteController.buscarPorId)
 router.put('/:id', requireRole('CLIENTE'), ClienteController.atualizar)
 router.delete('/:id', requireRole('CLIENTE'), ClienteController.deletar)
 

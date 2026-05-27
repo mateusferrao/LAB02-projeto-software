@@ -23,12 +23,14 @@ export async function meuPerfil(req: Request, res: Response, next: NextFunction)
 export async function atualizar(req: Request, res: Response, next: NextFunction) {
   try {
     const data = ClienteService.ClienteUpdateSchema.parse(req.body)
+    await ClienteService.garantirClienteDoUsuario(req.params.id, req.user!.id)
     res.json(await ClienteService.atualizar(req.params.id, data))
   } catch (err) { next(err) }
 }
 
 export async function deletar(req: Request, res: Response, next: NextFunction) {
   try {
+    await ClienteService.garantirClienteDoUsuario(req.params.id, req.user!.id)
     await ClienteService.deletar(req.params.id)
     res.status(204).end()
   } catch (err) { next(err) }
@@ -37,12 +39,14 @@ export async function deletar(req: Request, res: Response, next: NextFunction) {
 export async function adicionarRendimento(req: Request, res: Response, next: NextFunction) {
   try {
     const data = ClienteService.RendimentoSchema.parse(req.body)
+    await ClienteService.garantirClienteDoUsuario(req.params.id, req.user!.id)
     res.status(201).json(await ClienteService.adicionarRendimento(req.params.id, data))
   } catch (err) { next(err) }
 }
 
 export async function removerRendimento(req: Request, res: Response, next: NextFunction) {
   try {
+    await ClienteService.garantirClienteDoUsuario(req.params.id, req.user!.id)
     await ClienteService.removerRendimento(req.params.rendimentoId, req.params.id)
     res.status(204).end()
   } catch (err) { next(err) }

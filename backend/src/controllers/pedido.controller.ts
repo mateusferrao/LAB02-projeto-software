@@ -49,7 +49,7 @@ export async function cancelar(req: Request, res: Response, next: NextFunction) 
 export async function avaliar(req: Request, res: Response, next: NextFunction) {
   try {
     const data = PedidoService.AvaliarPedidoSchema.parse(req.body)
-    res.json(await PedidoService.avaliar(req.params.id, req.user!.id, data))
+    res.json(await PedidoService.avaliar(req.params.id, req.user!, data))
   } catch (err) { next(err) }
 }
 
